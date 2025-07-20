@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>探员档案信息录入系统</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3498db;
+            margin-top: 30px;
+            border-left: 5px solid #3498db;
+            padding-left: 10px;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], 
+        textarea, 
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .talent-list {
+            margin-left: 20px;
+        }
+        .talent-item {
+            margin-bottom: 10px;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+        #saveBtn {
+            background-color: #3498db;
+            color: white;
+        }
+        #downloadBtn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        #screenshotBtn {
+            background-color: #e67e22;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .indent {
+            margin-left: 30px;
+        }
+        #screenshotPreview {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        #screenshotImg {
+            max-width: 90%;
+            max-height: 90%;
+            border: 5px solid white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .preview-buttons {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .preview-buttons button {
+            padding: 10px 20px;
+        }
+        #closePreview {
+            background-color: #e74c3c;
+        }
+        #saveImage {
+            background-color: #2ecc71;
+        }
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            color: white;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>学员《探员档案》信息录入</h1>
+        
+        <form id="agentForm">
+            <h2>1. 基本信息</h2>
+            <div class="form-group">
+                <label for="agentCode">探员代号：</label>
+                <input type="text" id="agentCode" name="agentCode" required>
+            </div>
+            <div class="form-group">
+                <label for="trainingDate">培训日期：</label>
+                <input type="date" id="trainingDate" name="trainingDate" required>
+            </div>
+            
+            <h2>2. 我的天赋密码：自我解码成果</h2>
+            <div class="form-group">
+                <label for="personalCode">我的"专属代号"：</label>
+                <input type="text" id="personalCode" name="personalCode">
+            </div>
+            <div class="form-group">
+                <label for="codeReason">选择原因：</label>
+                <textarea id="codeReason" name="codeReason"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="destinyMark">我的"命运印记"（星座/生肖特质）：</label>
+                <input type="text" id="destinyMark" name="destinyMark">
+            </div>
+            
+            <h3>我的"天赋碎片"：</h3>
+            <div class="form-group">
+                <label for="interest">兴趣：</label>
+                <textarea id="interest" name="interest"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="ability">能力：</label>
+                <textarea id="ability" name="ability"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="values">价值观：</label>
+                <textarea id="values" name="values"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="mbti">我的"天赋密码"（MBTI类型）：</label>
+                <input type="text" id="mbti" name="mbti">
+            </div>
+            
+            <h3>我的最强核心优势（盖洛普5大才干）：</h3>
+            <div class="talent-list">
+                <div class="talent-item">
+                    <label for="talent1">才干1名称：</label>
+                    <input type="text" id="talent1" name="talent1">
+                </div>
+                <div class="talent-item">
+                    <label for="talent2">才干2名称：</label>
+                    <input type="text" id="talent2" name="talent2">
+                </div>
+                <div class="talent-item">
+                    <label for="talent3">才干3名称：</label>
+                    <input type="text" id="talent3" name="talent3">
+                </div>
+                <div class="talent-item">
+                    <label for="talent4">才干4名称：</label>
+                    <input type="text" id="talent4" name="talent4">
+                </div>
+                <div class="talent-item">
+                    <label for="talent5">才干5名称：</label>
+                    <input type="text" id="talent5" name="talent5">
+                </div>
+            </div>
+            
+            <h2>3. 我的未来蓝图：梦想与优势的融合</h2>
+            <div class="form-group">
+                <label for="dreamJob">我最想实现的职业梦想：</label>
+                <textarea id="dreamJob" name="dreamJob"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="attraction">我梦想中这份工作最吸引我的地方是：</label>
+                <textarea id="attraction" name="attraction"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="advantage">我的优势如何点亮梦想（简要描述）：</label>
+                <textarea id="advantage" name="advantage"></textarea>
+            </div>
+            
+            <h2>4. 我的职业探索：拓宽视野与实践体验</h2>
+            <div class="form-group">
+                <label for="weirdJob">我最感兴趣的"奇葩职业"：</label>
+                <input type="text" id="weirdJob" name="weirdJob">
+            </div>
+            <div class="form-group">
+                <label for="meetingRole">我在"会议风暴"中的角色是：</label>
+                <input type="text" id="meetingRole" name="meetingRole">
+            </div>
+            <div class="form-group">
+                <label for="hiddenSkill">我发现自己可能具备的"隐藏技能"：</label>
+                <input type="text" id="hiddenSkill" name="hiddenSkill">
+            </div>
+            
+            <h2>5. 我的未来行动指令：持续学习与成长路径</h2>
+            <div class="form-group">
+                <label for="educationPath">未来可探索的"再教育途径"：</label>
+                <textarea id="educationPath" name="educationPath"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="finalGoal">我的梦想目标（最终版）：</label>
+                <textarea id="finalGoal" name="finalGoal"></textarea>
+            </div>
+            
+            <h3>我的初步行动计划拆解：</h3>
+            <div class="indent">
+                <div class="form-group">
+                    <label for="action1">1.</label>
+                    <input type="text" id="action1" name="action1">
+                </div>
+                <div class="form-group">
+                    <label for="action2">2.</label>
+                    <input type="text" id="action2" name="action2">
+                </div>
+                <div class="form-group">
+                    <label for="action3">3.</label>
+                    <input type="text" id="action3" name="action3">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="aiAssessment">AI评估主要困难及克服建议：</label>
+                <textarea id="aiAssessment" name="aiAssessment"></textarea>
+            </div>
+            
+            <div class="action-buttons">
+                <button type="button" id="saveBtn">保存数据</button>
+                <button type="button" id="downloadBtn">下载文档</button>
+                <button type="button" id="screenshotBtn">生成截图</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 截图预览模态框 -->
+    <div id="screenshotPreview">
+        <img id="screenshotImg" alt="截图预览">
+        <div class="preview-buttons">
+            <button id="closePreview">关闭</button>
+            <button id="saveImage">保存图片</button>
+        </div>
+    </div>
+
+    <!-- 加载指示器 -->
+    <div class="loading" id="loadingIndicator">
+        正在生成截图，请稍候...
+    </div>
+
+    <script>
+        // 保存数据到本地存储
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('agentForm'));
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+            
+            localStorage.setItem('agentProfileData', JSON.stringify(data));
+            alert('数据已保存到本地！');
+        });
+
+        // 从本地存储加载数据
+        function loadSavedData() {
+            const savedData = localStorage.getItem('agentProfileData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                for (const key in data) {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        element.value = data[key];
+                    }
+                }
+                console.log('已加载保存的数据');
+            }
+        }
+
+        // 页面加载时检查是否有保存的数据
+        window.addEventListener('load', loadSavedData);
+
+        // 下载文档功能
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('agentForm'));
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            let docContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>探员档案 - ${data.agentCode || '未命名'}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
+                        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+                        h2 { color: #3498db; margin-top: 30px; }
+                        h3 { color: #2c3e50; margin-top: 20px; }
+                        .section { margin-bottom: 20px; }
+                        .talent-list { margin-left: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>探员档案 - ${data.agentCode || '未命名'}</h1>
+                    
+                    <div class="section">
+                        <h2>1. 基本信息</h2>
+                        <p><strong>探员代号：</strong> ${data.agentCode || '未填写'}</p>
+                        <p><strong>培训日期：</strong> ${data.trainingDate || '未填写'}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>2. 我的天赋密码：自我解码成果</h2>
+                        <p><strong>我的"专属代号"：</strong> ${data.personalCode || '未填写'}</p>
+                        <p><strong>选择原因：</strong> ${data.codeReason || '未填写'}</p>
+                        <p><strong>我的"命运印记"（星座/生肖特质）：</strong> ${data.destinyMark || '未填写'}</p>
+                        
+                        <h3>我的"天赋碎片"：</h3>
+                        <p><strong>兴趣：</strong> ${data.interest || '未填写'}</p>
+                        <p><strong>能力：</strong> ${data.ability || '未填写'}</p>
+                        <p><strong>价值观：</strong> ${data.values || '未填写'}</p>
+                        
+                        <p><strong>我的"天赋密码"（MBTI类型）：</strong> ${data.mbti || '未填写'}</p>
+                        
+                        <h3>我的最强核心优势（盖洛普5大才干）：</h3>
+                        <div class="talent-list">
+                            <p>1. ${data.talent1 || '未填写'}</p>
+                            <p>2. ${data.talent2 || '未填写'}</p>
+                            <p>3. ${data.talent3 || '未填写'}</p>
+                            <p>4. ${data.talent4 || '未填写'}</p>
+                            <p>5. ${data.talent5 || '未填写'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>3. 我的未来蓝图：梦想与优势的融合</h2>
+                        <p><strong>我最想实现的职业梦想：</strong> ${data.dreamJob || '未填写'}</p>
+                        <p><strong>我梦想中这份工作最吸引我的地方是：</strong> ${data.attraction || '未填写'}</p>
+                        <p><strong>我的优势如何点亮梦想（简要描述）：</strong> ${data.advantage || '未填写'}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>4. 我的职业探索：拓宽视野与实践体验</h2>
+                        <p><strong>我最感兴趣的"奇葩职业"：</strong> ${data.weirdJob || '未填写'}</p>
+                        <p><strong>我在"会议风暴"中的角色是：</strong> ${data.meetingRole || '未填写'}</p>
+                        <p><strong>我发现自己可能具备的"隐藏技能"：</strong> ${data.hiddenSkill || '未填写'}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>5. 我的未来行动指令：持续学习与成长路径</h2>
+                        <p><strong>未来可探索的"再教育途径"：</strong> ${data.educationPath || '未填写'}</p>
+                        <p><strong>我的梦想目标（最终版）：</strong> ${data.finalGoal || '未填写'}</p>
+                        
+                        <h3>我的初步行动计划拆解：</h3>
+                        <div class="talent-list">
+                            <p>1. ${data.action1 || '未填写'}</p>
+                            <p>2. ${data.action2 || '未填写'}</p>
+                            <p>3. ${data.action3 || '未填写'}</p>
+                        </div>
+                        
+                        <p><strong>AI评估主要困难及克服建议：</strong> ${data.aiAssessment || '未填写'}</p>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob([docContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `探员档案_${data.agentCode || '未命名'}.html`;
+            document.body.appendChild(a);
+            a.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+        });
+
+        // 截图功能
+        document.getElementById('screenshotBtn').addEventListener('click', function() {
+            document.getElementById('loadingIndicator').style.display = 'flex';
+            
+            // 隐藏操作按钮避免出现在截图中
+            const actionButtons = document.querySelector('.action-buttons');
+            const originalDisplay = actionButtons.style.display;
+            actionButtons.style.display = 'none';
+            
+            // 使用html2canvas生成截图
+            html2canvas(document.querySelector('.container'), {
+                scale: 2, // 提高截图质量
+                logging: false,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                // 恢复操作按钮显示
+                actionButtons.style.display = originalDisplay;
+                
+                // 显示截图预览
+                const preview = document.getElementById('screenshotPreview');
+                const img = document.getElementById('screenshotImg');
+                img.src = canvas.toDataURL('image/png');
+                preview.style.display = 'flex';
+                
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }).catch(err => {
+                console.error('截图生成失败:', err);
+                actionButtons.style.display = originalDisplay;
+                document.getElementById('loadingIndicator').style.display = 'none';
+                alert('截图生成失败，请重试');
+            });
+        });
+
+        // 关闭预览
+        document.getElementById('closePreview').addEventListener('click', function() {
+            document.getElementById('screenshotPreview').style.display = 'none';
+        });
+
+        // 保存图片
+        document.getElementById('saveImage').addEventListener('click', function() {
+            const agentCode = document.getElementById('agentCode').value || '未命名';
+            const link = document.createElement('a');
+            link.download = `探员档案_${agentCode}_${new Date().toISOString().slice(0,10)}.png`;
+            link.href = document.getElementById('screenshotImg').src;
+            link.click();
+        });
+    </script>
+</body>
+</html>
